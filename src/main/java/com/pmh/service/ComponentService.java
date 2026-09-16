@@ -6,6 +6,7 @@ import com.pmh.model.dto.ComponentCloneDTO;
 import com.pmh.model.dto.ComponentDetailResponseDTO;
 import com.pmh.model.dto.ComponentRequestDTO;
 import com.pmh.model.dto.ComponentSearchDTO;
+import com.pmh.model.entity.AuditLog;
 import com.pmh.model.entity.Components;
 import com.pmh.model.enums.ComponentStatus;
 import com.pmh.repository.ComponentRepository;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -29,12 +31,14 @@ public class ComponentService {
 
     private final ComponentRepository componentRepository;
     private final ObjectMapper objectMapper;
+    private final AuditLogService auditLogService;
 
     /**
      * Tìm kiếm & phân trang
      */
     @Transactional
     public Page<Components> search(ComponentSearchDTO filter, Pageable pageable) {
+
         if (filter == null) {
             filter = new ComponentSearchDTO();
         }
@@ -106,7 +110,7 @@ public class ComponentService {
                 .componentName(dto.getComponentName().trim())
                 .messageType(dto.getMessageType())
                 .connectionMethod(dto.getConnectionMethod())
-                .checkToken(dto.getCheckToken() != null ? dto.getCheckToken() : "N")
+                .checkToken(dto.getCheckToken() != null ? dto.getCheckToken().trim().toUpperCase() : "N")
                 .effectiveDate(dto.getEffectiveDate())
                 .endEffectiveDate(dto.getEndEffectiveDate())
                 .newData(null)
@@ -117,7 +121,12 @@ public class ComponentService {
         comp.setIsDisplay(1);
         comp.setIsActive(1);
 
-        return componentRepository.save(comp);
+        Components saved = componentRepository.save(comp);
+
+        // Ghi lịch sử thao tác ngắn gọn
+        auditLogService.saveLog(saved.getId(), "THÊM MỚI", null, saved.getStatus(), "Thêm mới cấu phần: " + saved.getComponentCode());
+
+        return saved;
     }
 
     /**
@@ -135,11 +144,10 @@ public class ComponentService {
 
         validateDates(dto.getEffectiveDate(), dto.getEndEffectiveDate(), false);
 
-
+        Integer oldStatus = currentComp.getStatus();
         dto.setComponentCode(currentComp.getComponentCode());
 
         if (status == ComponentStatus.NEW) {
-
             currentComp.setComponentName(dto.getComponentName().trim());
             currentComp.setMessageType(dto.getMessageType());
             currentComp.setConnectionMethod(dto.getConnectionMethod());
@@ -165,7 +173,10 @@ public class ComponentService {
             throw new RuntimeException("Không được phép sửa bản ghi ở trạng thái hiện tại!");
         }
 
-        return componentRepository.save(currentComp);
+        Components saved = componentRepository.save(currentComp);
+        auditLogService.saveLog(saved.getId(), "CẬP NHẬT", oldStatus, saved.getStatus(), "Cập nhật cấu phần: " + saved.getComponentCode());
+
+        return saved;
     }
 
     /**
@@ -186,6 +197,7 @@ public class ComponentService {
             throw new RuntimeException("Chỉ được phép xóa bản ghi ở trạng thái 'Mới'!");
         }
 
+        auditLogService.saveLog(comp.getId(), "XÓA", comp.getStatus(), null, "Xóa cấu phần: " + comp.getComponentCode());
         componentRepository.delete(comp);
     }
 
@@ -224,11 +236,116 @@ public class ComponentService {
         cloned.setIsDisplay(1);
         cloned.setIsActive(1);
 
-        return componentRepository.save(cloned);
+        Components saved = componentRepository.save(cloned);
+        auditLogService.saveLog(saved.getId(), "SAO CHÉP", null, saved.getStatus(), "Sao chép cấu phần: " + saved.getComponentCode());
+        return saved;
     }
 
     /**
+     * Gửi duyệt hàng loạt
+     */
+    @Transactional
+    public void submitApproval(List<Long> ids) {
+        List<Components> componentsList = componentRepository.findAllById(ids);
+        for (Components com : componentsList) {
+            if (com.getStatus() != 1 && com.getStatus() != 5 && com.getStatus() != 7) {
+                throw new RuntimeException("Trạng thái nộp duyệt không hợp lệ đối với mã: " + com.getComponentCode());
+            }
+            Integer oldStatus = com.getStatus();
+            com.setStatus(ComponentStatus.PENDING.getCode());
+
+            auditLogService.saveLog(com.getId(), "GỬI DUYỆT", oldStatus, com.getStatus(), "Gửi duyệt cấu phần: " + com.getComponentCode());
+        }
+
+        componentRepository.saveAll(componentsList);
+    }
+
+    /**
+     * Duyệt hàng loạt
+     */
+    @Transactional
+    public void approval(List<Long> ids) {
+        List<Components> componentsList = componentRepository.findAllById(ids);
+
+        for (Components com : componentsList) {
+            if (com.getStatus() != ComponentStatus.PENDING.getCode()) {
+                throw new RuntimeException("Trạng thái không hợp lệ để duyệt đối với mã: " + com.getComponentCode());
+            }
+            Integer oldStatus = com.getStatus();
+            com.setStatus(ComponentStatus.APPROVED.getCode());
+            com.setIsDisplay(2); // Đã duyệt ít nhất 1 lần -> không được xóa
+
+            // Nếu có NEW_DATA (do sửa ở trạng thái từ chối/hủy duyệt) thì merge vào các cột chính
+            if (com.getNewData() != null && !com.getNewData().isBlank()) {
+                try {
+                    ComponentRequestDTO newReq = objectMapper.readValue(com.getNewData(), ComponentRequestDTO.class);
+                    if (newReq.getComponentName() != null) com.setComponentName(newReq.getComponentName().trim());
+                    if (newReq.getMessageType() != null) com.setMessageType(newReq.getMessageType());
+                    if (newReq.getConnectionMethod() != null) com.setConnectionMethod(newReq.getConnectionMethod());
+                    if (newReq.getCheckToken() != null) com.setCheckToken(newReq.getCheckToken());
+                    if (newReq.getEffectiveDate() != null) com.setEffectiveDate(newReq.getEffectiveDate());
+                    if (newReq.getEndEffectiveDate() != null) com.setEndEffectiveDate(newReq.getEndEffectiveDate());
+                    com.setNewData(null);
+                } catch (Exception e) {
+                    log.error("Lỗi khi áp dụng NEW_DATA khi duyệt ID {}: {}", com.getId(), e.getMessage());
+                }
+            }
+
+            auditLogService.saveLog(com.getId(), "PHÊ DUYỆT", oldStatus, com.getStatus(), "Phê duyệt cấu phần: " + com.getComponentCode());
+        }
+        componentRepository.saveAll(componentsList);
+    }
+
+    /**
+     * Từ chối duyệt
+     */
+    @Transactional
+    public void reject(List<Long> ids) {
+        List<Components> componentsList = componentRepository.findAllById(ids);
+
+        for (Components com : componentsList) {
+            if (com.getStatus() != ComponentStatus.PENDING.getCode()) {
+                throw new RuntimeException("Trạng thái không hợp lệ để từ chối đối với mã: " + com.getComponentCode());
+            }
+            Integer oldStatus = com.getStatus();
+            com.setStatus(ComponentStatus.REJECTED.getCode());
+
+            auditLogService.saveLog(com.getId(), "TỪ CHỐI", oldStatus, com.getStatus(), "Từ chối duyệt cấu phần: " + com.getComponentCode());
+        }
+        componentRepository.saveAll(componentsList);
+    }
+
+    /**
+     * Hủy duyệt
+     */
+    @Transactional
+    public void cancelApproval(List<Long> ids) {
+        List<Components> componentsList = componentRepository.findAllById(ids);
+
+        for (Components com : componentsList) {
+            if (com.getStatus() != ComponentStatus.APPROVED.getCode()) {
+                throw new RuntimeException("Trạng thái không hợp lệ để hủy duyệt đối với mã: " + com.getComponentCode());
+            }
+            Integer oldStatus = com.getStatus();
+            com.setStatus(ComponentStatus.CANCELLED.getCode());
+
+            auditLogService.saveLog(com.getId(), "HỦY DUYỆT", oldStatus, com.getStatus(), "Hủy duyệt cấu phần: " + com.getComponentCode());
+        }
+        componentRepository.saveAll(componentsList);
+    }
+
+    /**
+     * Lấy lịch sử thao tác của cấu phần có phân trang
+     */
+    @Transactional(readOnly = true)
+    public Page<AuditLog> getHistory(String id, Pageable pageable) {
+        return auditLogService.getHistory(id, pageable);
+    }
+
+
+    /**
      * Kiểm tra tính hợp lệ của ngày hiệu lực
+
      */
     private void validateDates(LocalDateTime effectiveDate, LocalDateTime endEffectiveDate, boolean checkPast) {
         if (effectiveDate == null) {

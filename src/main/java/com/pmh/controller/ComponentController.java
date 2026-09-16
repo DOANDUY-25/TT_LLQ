@@ -5,13 +5,17 @@ import com.pmh.model.dto.ComponentDetailResponseDTO;
 import com.pmh.model.dto.ComponentRequestDTO;
 import com.pmh.model.dto.ComponentSearchDTO;
 import com.pmh.model.entity.ApiResponse;
+import com.pmh.model.entity.AuditLog;
 import com.pmh.model.entity.Components;
 import com.pmh.service.ComponentService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +25,7 @@ public class ComponentController {
     private final ComponentService componentService;
 
     /**
-     *  Tìm kiếm và phân trang
+     * Tìm kiếm và phân trang
      */
     @PostMapping("/search")
     public ApiResponse<Page<Components>> search(@RequestBody(required = false) ComponentSearchDTO filter, Pageable pageable) {
@@ -59,7 +63,7 @@ public class ComponentController {
     }
 
     /**
-     *  Xóa cấu phần (Chỉ xóa được khi IS_DISPLAY = 1 và Status = 1)
+     * Xóa cấu phần (Chỉ xóa được khi IS_DISPLAY = 1 và Status = 1)
      */
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(@PathVariable Long id) {
@@ -75,5 +79,43 @@ public class ComponentController {
         Components cloned = componentService.clone(id, cloneDTO);
         return ApiResponse.success(cloned, "Sao chép cấu phần thành công");
     }
+
+    /**
+     * Gửi duyệt hàng loạt
+     */
+
+    @PostMapping("/submit-approval")
+    public ApiResponse<Components> submitApproval(@RequestBody List<Long> ids) {
+        componentService.submitApproval(ids);
+        return ApiResponse.success(null, "Đã nộp duyệt thành công");
+    }
+
+    @PostMapping("/approval")
+    public ApiResponse<Components> approval(@RequestBody List<Long> ids) {
+        componentService.approval(ids);
+        return ApiResponse.success(null, "Đã duyệt thành công");
+    }
+
+    @PostMapping("/reject")
+    public ApiResponse<Components> reject(@RequestBody List<Long> ids) {
+        componentService.reject(ids);
+        return ApiResponse.success(null, "Đã từ chối thành công");
+    }
+
+    @PostMapping("/cancel-approval")
+    public ApiResponse<Components> cancelApproval(@RequestBody List<Long> ids) {
+        componentService.cancelApproval(ids);
+        return ApiResponse.success(null, "Đã hủy duyệt thành công");
+    }
+
+    /**
+     * Lấy lịch sử thao tác của 1 cấu phần có phân trang
+     */
+    @GetMapping("/{id}/history")
+    public ApiResponse<Page<AuditLog>> getHistory(@PathVariable String id, Pageable pageable) {
+        Page<AuditLog> history = componentService.getHistory(id, pageable);
+        return ApiResponse.success(history, "Lấy lịch sử thao tác thành công");
+    }
 }
+
 
