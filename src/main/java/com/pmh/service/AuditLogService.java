@@ -48,10 +48,14 @@ public class AuditLogService {
     }
 
     private String getCurrentUser() {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+            return auth.getName();
+        }
         if (request != null && request.getUserPrincipal() != null) {
             return request.getUserPrincipal().getName();
         }
-        return "admin"; // Mặc định khi chưa có Security
+        return "admin";
     }
 }
 

@@ -6,12 +6,19 @@ spring:
     driver-class-name: oracle.jdbc.OracleDriver
   jpa:
     database-platform: org.hibernate.dialect.OracleDialect
-    hibernate.ddl-auto: validate
+    hibernate.ddl-auto: update
     properties.hibernate.format_sql: true
   security:
     jwt:
-      secret: ${JWT_SECRET}
-      expiration-ms: 3600000
+      secret: ${JWT_SECRET:pmhSecretKeyForJwtTokenMustBeAtLeast256BitsLongForHMACSHA256}
+      expiration-ms: 1800000 # 30 phút cho Access Token
+      refresh-expiration-ms: 604800000 # 7 ngày cho Refresh Token
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:pmhSecretKeyForJwtTokenMustBeAtLeast256BitsLongForHMACSHA256}
+    expiration-ms: 1800000 # 30 phút cho Access Token
+    refresh-expiration-ms: 604800000 # 7 ngày cho Refresh Token
 
 server:
   port: 8899
