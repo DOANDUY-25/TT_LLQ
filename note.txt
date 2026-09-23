@@ -1,0 +1,72 @@
+Tham số có 2 trạng thái: Trạng thái tham số => Phục vụ cho luồng phê duyêt
+			 Trạng thái hoat động => Phục vụ cho việc sử dụng của hệ thống
+1. Các trạng thái được phép sửa: Tạo mới, Từ chối, hủy duyệt
+
+RULE: Bản ghi ở trạng thái đã phê duyệt => Hủy duyệt => Sửa: => giá trị sửa không được thay thế trực tiếp => Mà chỉ lưu vào NEW_DATA;
+2. kiểm tra lại về luồng xử lý của các trạng thái tham số. 
+==============note review be==================
+1. Tìm hiểu lại ý nghĩa các anotation trong BE (tìm hiểu sự khác biệt giữa @controler và @restControsller 
+2. Tìm hiểu lại contructor trong java
+3. Tìm hiểu lại về OOP
+9. tìm hiểu vè thời gian chạy của các annotation
+10. tìm hiểu đối tượng OBjectmapper, Các cách convert Object thành json và ngược lại
+11. tìm hiểu cơ chế của transaction, vì sao có thể rollback khi 1 trong nhiều hoạt động tương tác vào db bị lỗi
+12. đối với 1 method private thì @transaction có tác dụng không
+13. tìm hiểu sự liên hệ giữa entity và @transaction
+14. tìm hiểu @transaction và @trasactionTemple 
+15. (tìm hiểu sự khác biệt giữa @controler và @restControsller 
+16. sửa các thoong báo http request chuẩn cho các phương thức
+============note review frontend==============
+1. giải thích các toán tử: ?? và ||;
+
+const name = person.name || 'Nguyễn Tiến Đạt';
+const name = person.name ?? 'Nguyễn Tiến Đạt';
+
+
+2. Tìm hiểu về @input và @output trong angular. Thực hành nó với form đối chiếu
+
+3. tìm hiểu các method implements OnInit sẽ chạy vào thời điểm nào, hàm ngOnInit khởi chạy lúc nào
+4. inject(LanguageService); inject là gì? để làm gì
+
+
+5. làm phân trang his
+
+
+Note: Tập trung hiệu năng
+- chỉ cần danh sách ID để duyệt hủy hàng loạt
+- bổ sung cronjob để tự động đổi trạng thái hoạt động của tham số trong be và sql
+- 
+có anh Tuấn Anh gửi ae mấy cái note từ các review trước:
+status = 1: Mới -> sửa -> Update dữ liệu
+status = 5, 7: Từ chối, Hủy duyệt -> Sửa -> lưu Json vào NewData
+
+
+Các nút: Sao chép, Sửa, Xóa, Gửi duyệt, Phê duyệt, Hủy duyệt, Từ chối
+Mới -> Sao chép, Sửa, Xóa, Gửi duyệt
+Chờ duyệt -> Sao chép, Từ chối, Phê duyệt
+Đã duyệt -> Sao chép, Hủy duyệt
+Từ chối -> Sửa, Sao chép, Gửi duyệt
+Hủy duyệt -> Sửa, Sao chép, Gửi duyệt
+Bổ sung giúp anh nhé
+Backend:
+Spring Security 6, JWT bằng thư viện jsonwebtoken, Mật khẩu hash bằng BCrypt
+Phân quyền bằng annotation @PreAuthorize trên method
+Oracle 19c lưu user + role (3 bảng:user, roles, user_role)
+Frontend:
+Angular + HttpInterceptor (tự gắn token vào mọi request, tự bắt 401)
+Route Guard (CanActivate) chặn vào màn không có quyền
+Directive ẩn/hiện nút theo quyền
+có dùng 3 bảng này không
+PMH_USERS
+PMH_ROLES
+PMH_USER_ROLE
+admin - full quyền
+viewer - chỉ được xem
+checker - được từ chối, hủy duyệt, phê duyệt
+maker - tạo, sửa , gửi duyệt
+
+
+
+	
+
+
