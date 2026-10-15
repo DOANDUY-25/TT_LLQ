@@ -2,6 +2,7 @@ package com.pmh.controller;
 
 import com.pmh.model.dto.AuthResponse;
 import com.pmh.model.dto.LoginRequest;
+import com.pmh.model.dto.RegisterRequest;
 import com.pmh.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(authService.register(request));
+    }
+
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(@RequestBody Map<String, String> body) {
         return ResponseEntity.ok(authService.refresh(body.get("refreshToken")));
@@ -33,4 +39,3 @@ public class AuthController {
         return ResponseEntity.ok("Đăng xuất thành công");
     }
 }
-

@@ -17,7 +17,12 @@ import java.time.LocalDateTime;
 public class AuditLog {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pmh_audit_log_seq_gen")
+    @SequenceGenerator(
+            name = "pmh_audit_log_seq_gen",
+            sequenceName = "PMH_AUDIT_LOG_SEQ",
+            allocationSize = 1
+    )
     @Column(name = "ID")
     private Long id;
 

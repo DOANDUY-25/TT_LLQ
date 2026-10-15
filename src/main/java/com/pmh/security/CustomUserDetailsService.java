@@ -28,7 +28,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .disabled(!"Y".equals(user.getEnabled()))
                 .authorities(user.getRoles() != null
                         ? user.getRoles().stream()
-                                .map(r -> new SimpleGrantedAuthority("ROLE_" + r.getRoleCode()))
+                                .map(r -> {
+                                    String code = r.getRoleCode();
+                                    return new SimpleGrantedAuthority(code.startsWith("ROLE_") ? code : "ROLE_" + code);
+                                })
                                 .collect(Collectors.toList())
                         : java.util.Collections.emptyList())
                 .build();

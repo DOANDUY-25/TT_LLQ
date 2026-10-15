@@ -20,10 +20,10 @@ public abstract class BaseEntity {
     @Column(name = "STATUS", nullable = false)
     private Integer status = 1;
 
-    @Column(name = "IS_ACTIVE", nullable = false)
+    @Column(name = "IS_ACTIVE")
     private Integer isActive = 1;
 
-    @Column(name = "IS_DISPLAY", nullable = false)
+    @Column(name = "IS_DISPLAY")
     private Integer isDisplay = 1;
 
     @CreatedBy

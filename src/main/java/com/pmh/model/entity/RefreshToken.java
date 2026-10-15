@@ -11,19 +11,23 @@ import java.time.LocalDateTime;
 public class RefreshToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pmh_refresh_token_seq_gen")
+    @SequenceGenerator(name = "pmh_refresh_token_seq_gen", sequenceName = "PMH_REFRESH_TOKEN_SEQ", allocationSize = 1)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 500)
+    @Column(unique = true, length = 500)
     private String token;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_ID", nullable = false)
+    @JoinColumn(name = "USER_ID")
     private Users user;
 
-    @Column(nullable = false)
+    @Column
     private LocalDateTime expiryDate;
 
-    @Column(nullable = false)
+    @Column
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "REVOKED")
+    private Boolean revoked = false;
 }

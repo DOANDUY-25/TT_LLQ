@@ -37,13 +37,14 @@ public class Components extends BaseEntity {
     @Column(name = "CONNECTION_METHOD", length = 255)
     private String connectionMethod;
 
+    @Builder.Default
     @Column(name = "CHECK_TOKEN",columnDefinition = "CHAR(1)")
     private String checkToken = "N";
 
-    @Column(name = "DESCRIPTION", length = 4000)
+    @Column(name = "DESCRIPTION", columnDefinition = "VARCHAR2(4000 CHAR)")
     private String description;
 
-    @Column(name = "NEW_DATA", length = 4000)
+    @Column(name = "NEW_DATA", columnDefinition = "VARCHAR2(4000 CHAR)")
     private String newData;
 
     @Column(name = "EFFECTIVE_DATE", nullable = false)

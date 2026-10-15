@@ -18,7 +18,8 @@ import java.util.Set;
 public class Users {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pmh_users_seq_gen")
+    @SequenceGenerator(name = "pmh_users_seq_gen", sequenceName = "PMH_USERS_SEQ", allocationSize = 1)
     @Column(name = "ID")
     private Long id;
 

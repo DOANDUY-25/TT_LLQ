@@ -15,6 +15,6 @@ public class ComponentSearchDTO {
     private List<String> componentNames;
     private List<Integer> statuses;
     private List<Integer> isActives;
-    private Integer page = 0;
-    private Integer size = 20;
+    private Integer page;
+    private Integer size;
 }

@@ -1,6 +1,5 @@
 package com.pmh.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -38,14 +37,13 @@ public class ComponentRequestDTO {
     @Size(max = 1000, message = "Tên kết nối không được vượt quá 1000 ký tự")
     private String connectionMethod;
 
+    @Builder.Default
     @Pattern(regexp = "^[YyNn]$", message = "Kiểm tra token chỉ nhận giá trị Y hoặc N")
     private String checkToken = "N";
 
     @NotNull(message = "Ngày hiệu lực không được để trống")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime effectiveDate;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endEffectiveDate;
 
     

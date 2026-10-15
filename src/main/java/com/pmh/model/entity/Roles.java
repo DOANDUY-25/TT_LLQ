@@ -15,7 +15,8 @@ import lombok.Setter;
 public class Roles {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pmh_roles_seq_gen")
+    @SequenceGenerator(name = "pmh_roles_seq_gen", sequenceName = "PMH_ROLES_SEQ", allocationSize = 1)
     @Column(name = "ID")
     private Long id;
 
@@ -25,6 +26,6 @@ public class Roles {
     @Column(name = "ROLE_NAME", nullable = false, length = 255)
     private String roleName;
 
-    @Column(name = "DESCRIPTION", length = 4000)
+    @Column(name = "DESCRIPTION", columnDefinition = "VARCHAR2(4000 CHAR)")
     private String description;
 }

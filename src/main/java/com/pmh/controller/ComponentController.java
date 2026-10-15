@@ -28,7 +28,7 @@ public class ComponentController {
      * Tìm kiếm và phân trang
      * Quyền: ADMIN, VIEWER, MAKER, CHECKER
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'VIEWER', 'MAKER', 'CHECKER')")
+     @PreAuthorize("hasAnyRole('ADMIN', 'VIEWER', 'MAKER', 'CHECKER')")
     @PostMapping("/search")
     public ApiResponse<Page<Components>> search(@RequestBody(required = false) ComponentSearchDTO filter, Pageable pageable) {
         Page<Components> componentsList = componentService.search(filter, pageable);
@@ -36,10 +36,28 @@ public class ComponentController {
     }
 
     /**
+     * Lấy danh sách distinct COMPONENT_CODE để filter
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'VIEWER', 'MAKER', 'CHECKER')")
+    @GetMapping("/distinct-codes")
+    public ApiResponse<List<String>> getDistinctCodes() {
+        return ApiResponse.success(componentService.getDistinctCodes(), "OK");
+    }
+
+    /**
+     * Lấy danh sách distinct COMPONENT_NAME để filter
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'VIEWER', 'MAKER', 'CHECKER')")
+    @GetMapping("/distinct-names")
+    public ApiResponse<List<String>> getDistinctNames() {
+        return ApiResponse.success(componentService.getDistinctNames(), "OK");
+    }
+
+    /**
      * Xem chi tiết cấu phần (hỗ trợ hiển thị so sánh Dữ liệu cũ & Dữ liệu mới từ NEW_DATA)
      * Quyền: ADMIN, VIEWER, MAKER, CHECKER
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'VIEWER', 'MAKER', 'CHECKER')")
+     @PreAuthorize("hasAnyRole('ADMIN', 'VIEWER', 'MAKER', 'CHECKER')")
     @GetMapping("/{id}")
     public ApiResponse<ComponentDetailResponseDTO> getDetail(@PathVariable Long id) {
         ComponentDetailResponseDTO detail = componentService.getDetail(id);
@@ -50,7 +68,7 @@ public class ComponentController {
      * Thêm mới cấu phần (Status = 1: Mới, IsDisplay = 1)
      * Quyền: ADMIN, MAKER
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'MAKER')")
+     @PreAuthorize("hasAnyRole('ADMIN', 'MAKER')")
     @PostMapping
     public ApiResponse<Components> create(@Valid @RequestBody ComponentRequestDTO dto) {
         Components created = componentService.create(dto);
@@ -63,7 +81,7 @@ public class ComponentController {
      * - Status = 5 (Từ chối) / 7 (Hủy duyệt): Lưu JSON vào NEW_DATA
      * Quyền: ADMIN, MAKER
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'MAKER')")
+     @PreAuthorize("hasAnyRole('ADMIN', 'MAKER')")
     @PutMapping("/{id}")
     public ApiResponse<Components> update(@PathVariable Long id, @Valid @RequestBody ComponentRequestDTO dto) {
         Components updated = componentService.update(id, dto);
@@ -74,7 +92,7 @@ public class ComponentController {
      * Xóa cấu phần (Chỉ xóa được khi IS_DISPLAY = 1 và Status = 1)
      * Quyền: ADMIN, MAKER
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'MAKER')")
+     @PreAuthorize("hasAnyRole('ADMIN', 'MAKER')")
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(@PathVariable Long id) {
         componentService.delete(id);
@@ -85,7 +103,7 @@ public class ComponentController {
      * Sao chép cấu phần (Clone)
      * Quyền: ADMIN, MAKER
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'MAKER')")
+     @PreAuthorize("hasAnyRole('ADMIN', 'MAKER')")
     @PostMapping("/{id}/clone")
     public ApiResponse<Components> clone(@PathVariable Long id, @Valid @RequestBody ComponentCloneDTO cloneDTO) {
         Components cloned = componentService.clone(id, cloneDTO);
@@ -96,7 +114,7 @@ public class ComponentController {
      * Gửi duyệt hàng loạt
      * Quyền: ADMIN, MAKER
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'MAKER')")
+     @PreAuthorize("hasAnyRole('ADMIN', 'MAKER')")
     @PostMapping("/submit-approval")
     public ApiResponse<Components> submitApproval(@RequestBody List<Long> ids) {
         componentService.submitApproval(ids);
@@ -107,7 +125,7 @@ public class ComponentController {
      * Phê duyệt hàng loạt
      * Quyền: ADMIN, CHECKER
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'CHECKER')")
+     @PreAuthorize("hasAnyRole('ADMIN', 'CHECKER')")
     @PostMapping("/approval")
     public ApiResponse<Components> approval(@RequestBody List<Long> ids) {
         componentService.approval(ids);
@@ -118,7 +136,7 @@ public class ComponentController {
      * Từ chối hàng loạt
      * Quyền: ADMIN, CHECKER
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'CHECKER')")
+     @PreAuthorize("hasAnyRole('ADMIN', 'CHECKER')")
     @PostMapping("/reject")
     public ApiResponse<Components> reject(@RequestBody List<Long> ids) {
         componentService.reject(ids);
@@ -129,7 +147,7 @@ public class ComponentController {
      * Hủy duyệt hàng loạt
      * Quyền: ADMIN, CHECKER
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'CHECKER')")
+     @PreAuthorize("hasAnyRole('ADMIN', 'CHECKER')")
     @PostMapping("/cancel-approval")
     public ApiResponse<Components> cancelApproval(@RequestBody List<Long> ids) {
         componentService.cancelApproval(ids);
@@ -140,7 +158,7 @@ public class ComponentController {
      * Lấy lịch sử thao tác của 1 cấu phần có phân trang
      * Quyền: ADMIN, VIEWER, MAKER, CHECKER
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'VIEWER', 'MAKER', 'CHECKER')")
+     @PreAuthorize("hasAnyRole('ADMIN', 'VIEWER', 'MAKER', 'CHECKER')")
     @GetMapping("/{id}/history")
     public ApiResponse<Page<AuditLog>> getHistory(@PathVariable String id, Pageable pageable) {
         Page<AuditLog> history = componentService.getHistory(id, pageable);

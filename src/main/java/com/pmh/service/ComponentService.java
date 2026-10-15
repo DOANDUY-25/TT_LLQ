@@ -33,10 +33,7 @@ public class ComponentService {
     private final ObjectMapper objectMapper;
     private final AuditLogService auditLogService;
 
-    /**
-     * Tìm kiếm & phân trang
-     */
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<Components> search(ComponentSearchDTO filter, Pageable pageable) {
 
         if (filter == null) {
@@ -70,10 +67,7 @@ public class ComponentService {
 
     }
 
-    /**
-     * Xem chi tiết cấu phần (trả về Dữ liệu cũ và Dữ liệu mới từ NEW_DATA nếu có)
-     */
-    @Transactional
+    @Transactional(readOnly = true)
     public ComponentDetailResponseDTO getDetail(Long id) {
         Components comp = componentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy cấu phần với ID: " + id));
@@ -93,9 +87,6 @@ public class ComponentService {
                 .build();
     }
 
-    /**
-     * Thêm mới cấu phần (Role: MAKER)
-     */
     @Transactional
     public Components create(ComponentRequestDTO dto) {
 
@@ -116,14 +107,12 @@ public class ComponentService {
                 .newData(null)
                 .build();
 
-        // Mặc định khi tạo mới: Status = 1 (Mới), IsDisplay = 1 (Chưa duyệt, cho phép xóa), IsActive = 1
         comp.setStatus(ComponentStatus.NEW.getCode());
         comp.setIsDisplay(1);
         comp.setIsActive(1);
 
         Components saved = componentRepository.save(comp);
 
-        // Ghi lịch sử thao tác ngắn gọn
         auditLogService.saveLog(saved.getId(), "THÊM MỚI", null, saved.getStatus(), "Thêm mới cấu phần: " + saved.getComponentCode());
 
         return saved;
@@ -241,9 +230,7 @@ public class ComponentService {
         return saved;
     }
 
-    /**
-     * Gửi duyệt hàng loạt
-     */
+
     @Transactional
     public void submitApproval(List<Long> ids) {
         List<Components> componentsList = componentRepository.findAllById(ids);
@@ -260,9 +247,7 @@ public class ComponentService {
         componentRepository.saveAll(componentsList);
     }
 
-    /**
-     * Duyệt hàng loạt
-     */
+ 
     @Transactional
     public void approval(List<Long> ids) {
         List<Components> componentsList = componentRepository.findAllById(ids);
@@ -296,9 +281,7 @@ public class ComponentService {
         componentRepository.saveAll(componentsList);
     }
 
-    /**
-     * Từ chối duyệt
-     */
+
     @Transactional
     public void reject(List<Long> ids) {
         List<Components> componentsList = componentRepository.findAllById(ids);
@@ -315,9 +298,7 @@ public class ComponentService {
         componentRepository.saveAll(componentsList);
     }
 
-    /**
-     * Hủy duyệt
-     */
+
     @Transactional
     public void cancelApproval(List<Long> ids) {
         List<Components> componentsList = componentRepository.findAllById(ids);
@@ -332,6 +313,22 @@ public class ComponentService {
             auditLogService.saveLog(com.getId(), "HỦY DUYỆT", oldStatus, com.getStatus(), "Hủy duyệt cấu phần: " + com.getComponentCode());
         }
         componentRepository.saveAll(componentsList);
+    }
+
+    /**
+     * Lấy danh sách distinct COMPONENT_CODE để dùng cho filter
+     */
+    @Transactional(readOnly = true)
+    public List<String> getDistinctCodes() {
+        return componentRepository.findDistinctComponentCodes();
+    }
+
+    /**
+     * Lấy danh sách distinct COMPONENT_NAME để dùng cho filter
+     */
+    @Transactional(readOnly = true)
+    public List<String> getDistinctNames() {
+        return componentRepository.findDistinctComponentNames();
     }
 
     /**
