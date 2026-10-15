@@ -1,0 +1,366 @@
+<div class="list-page fade-in-up">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb-nav">
+    <span class="breadcrumb-link">Tham số</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <span class="breadcrumb-current">Tham số danh mục theo nhóm</span>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">Tham số danh mục theo nhóm</h1>
+    <button class="btn btn-submit-approval" (click)="onCreate()" *ngIf="hasRole('MAKER')" id="btn-create">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Thêm mới
+    </button>
+  </div>
+
+  <!-- Search Panel -->
+  <div class="search-card">
+    <div class="search-card-header">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <span>Bộ lọc tìm kiếm</span>
+    </div>
+    <div class="search-card-body">
+      <div class="filter-grid-5">
+
+        <!-- Danh mục theo nhóm -->
+        <div class="filter-field">
+          <label class="filter-label">Danh mục theo nhóm</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </span>
+            <input type="text" [(ngModel)]="filter.paramType"
+                   class="form-control" placeholder="Nhập nội dung..."
+                   (keyup.enter)="onSearch()" id="filter-param-type" />
+          </div>
+        </div>
+
+        <!-- Giá trị thành phần -->
+        <div class="filter-field">
+          <label class="filter-label">Giá trị thành phần</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </span>
+            <input type="text" [(ngModel)]="filter.paramValue"
+                   class="form-control" placeholder="Nhập nội dung..."
+                   (keyup.enter)="onSearch()" id="filter-param-value" />
+          </div>
+        </div>
+
+        <!-- Tên thành phần -->
+        <div class="filter-field">
+          <label class="filter-label">Tên thành phần</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </span>
+            <input type="text" [(ngModel)]="filter.paramName"
+                   class="form-control" placeholder="Nhập nội dung..."
+                   (keyup.enter)="onSearch()" id="filter-param-name" />
+          </div>
+        </div>
+
+        <!-- Trạng thái tham số -->
+        <div class="filter-field">
+          <label class="filter-label">Trạng thái tham số</label>
+          <div class="select-wrap">
+            <select [(ngModel)]="filter.statuses" multiple size="1" class="form-control multi-select" id="filter-status">
+              <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+            <div class="multi-placeholder" *ngIf="!filter.statuses?.length">Tất cả trạng thái</div>
+            <div class="multi-count"       *ngIf="filter.statuses?.length">{{ filter.statuses!.length }} đã chọn</div>
+          </div>
+        </div>
+
+        <!-- Trạng thái hoạt động -->
+        <div class="filter-field">
+          <label class="filter-label">Trạng thái hoạt động</label>
+          <div class="select-wrap">
+            <select [(ngModel)]="filter.isActives" multiple size="1" class="form-control multi-select" id="filter-is-active">
+              <option *ngFor="let opt of isActiveOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+            <div class="multi-placeholder" *ngIf="!filter.isActives?.length">Tất cả</div>
+            <div class="multi-count"       *ngIf="filter.isActives?.length">{{ filter.isActives!.length }} đã chọn</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-secondary" (click)="onResetFilter()" id="btn-reset">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.28"/>
+          </svg>
+          Làm mới
+        </button>
+        <button class="btn btn-primary" (click)="onSearch()" id="btn-search">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Tìm kiếm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Action Bar -->
+  <div class="bulk-bar" *ngIf="selected.length > 0">
+    <div class="bulk-bar-left">
+      <div class="bulk-count">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Đã chọn <strong>{{ selected.length }}</strong> bản ghi
+      </div>
+    </div>
+    <div class="bulk-bar-right">
+      <button class="btn-sm btn-info" (click)="bulkSubmit()" [disabled]="!canBulkSubmit()" *ngIf="hasRole('MAKER')">Gửi duyệt</button>
+      <button class="btn-sm btn-success" (click)="openBulkApproveConfirm()" [disabled]="!canBulkApprove()" *ngIf="hasRole('CHECKER')">Phê duyệt</button>
+      <button class="btn-sm btn-danger" (click)="openBulkRejectDialog()" [disabled]="!canBulkReject()" *ngIf="hasRole('CHECKER')">Từ chối</button>
+      <button class="btn-sm btn-warning" (click)="openBulkCancelConfirm()" [disabled]="!canBulkCancel()" *ngIf="hasRole('CHECKER')">Hủy duyệt</button>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-card-title">
+        Danh sách bản ghi
+        <span class="total-badge">{{ totalElements }}</span>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" style="margin-left:auto;cursor:pointer" title="Xuất Excel">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="sticky-col sticky-col-0 checkbox-col">
+              <input type="checkbox" [checked]="allSelected" (change)="toggleSelectAll($any($event.target).checked)" id="chk-all" />
+            </th>
+            <th class="sticky-col sticky-col-1" style="width:50px">STT</th>
+            <th class="sticky-col sticky-col-2" style="min-width:140px">Danh mục theo nhóm</th>
+            <th class="sticky-col sticky-col-3" style="min-width:120px">Giá trị thành phần</th>
+            <th style="min-width:160px">Tên thành phần</th>
+            <th style="min-width:80px">Mô tả</th>
+            <th style="min-width:110px">Cấu phần xử lý</th>
+            <th style="min-width:140px">Ngày hiệu lực</th>
+            <th style="min-width:140px">Ngày hết HLực</th>
+            <th style="min-width:130px">Trạng thái tham số</th>
+            <th style="min-width:120px">Trạng thái HĐ</th>
+            <th class="actions-col" style="min-width:180px">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Loading -->
+          <tr *ngIf="loading">
+            <td colspan="12" class="empty-cell">
+              <div class="loading-spinner">
+                <div class="spinner"></div>
+                <span>Đang tải dữ liệu...</span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Empty -->
+          <tr *ngIf="!loading && items.length === 0">
+            <td colspan="12" class="empty-cell">
+              <div class="empty-state-inline">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <p>Không tìm thấy dữ liệu</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Data rows -->
+          <tr *ngFor="let item of items; let i = index"
+              [class.selected]="isSelected(item)"
+              (dblclick)="onViewDetail(item)"
+              style="cursor:pointer"
+              title="Double click để xem chi tiết">
+
+            <td class="checkbox-col sticky-col sticky-col-0">
+              <input type="checkbox" [checked]="isSelected(item)" (change)="toggleSelect(item)" (click)="$event.stopPropagation()" />
+            </td>
+            <td class="sticky-col sticky-col-1 text-muted" style="font-size:13px">{{ currentPage * pageSize + i + 1 }}</td>
+            <td class="sticky-col sticky-col-2">
+              <span class="param-type-badge">{{ item.paramType }}</span>
+            </td>
+            <td class="sticky-col sticky-col-3 code-cell">{{ item.paramValue }}</td>
+            <td style="font-weight:500">{{ item.paramName }}</td>
+            <td class="text-muted" style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" [title]="item.description || ''">
+              {{ item.description || '—' }}
+            </td>
+            <td class="text-muted">{{ item.componentCode }}</td>
+            <td class="text-muted" style="font-size:12px">{{ item.effectiveDate | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td class="text-muted" style="font-size:12px">{{ item.endEffectiveDate ? (item.endEffectiveDate | date:'dd/MM/yyyy HH:mm') : '—' }}</td>
+            <td>
+              <span class="badge" [ngClass]="'badge-' + getStatusColor(item.status)">
+                {{ getStatusLabel(item.status) }}
+              </span>
+            </td>
+            <td>
+              <span class="active-badge" [class.is-active]="item.isActive === 1">
+                <span class="dot"></span>
+                {{ item.isActive === 1 ? 'Hoạt động' : 'Không HĐ' }}
+              </span>
+            </td>
+            <td class="actions-col">
+              <div class="row-actions">
+
+                <!-- Xem -->
+                <button class="btn-icon" title="Xem chi tiết" (click)="onViewDetail(item); $event.stopPropagation()">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+
+                <!-- Sao chép -->
+                <button class="btn-icon" title="Sao chép" (click)="onClone(item); $event.stopPropagation()" *ngIf="getActionConfig(item).canClone">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </button>
+
+                <!-- Sửa -->
+                <button class="btn-icon" title="Sửa" (click)="onEdit(item); $event.stopPropagation()" *ngIf="getActionConfig(item).canEdit">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+
+                <!-- Xóa -->
+                <button class="btn-icon text-danger" title="Xóa" (click)="onRowDelete(item); $event.stopPropagation()" *ngIf="getActionConfig(item).canDelete">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                  </svg>
+                </button>
+
+                <!-- Gửi duyệt -->
+                <button class="btn-icon text-info" title="Gửi duyệt" (click)="onRowSubmit(item); $event.stopPropagation()" *ngIf="getActionConfig(item).canSubmit">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  </svg>
+                </button>
+
+                <!-- Lịch sử -->
+                <button class="btn-icon" title="Lịch sử" (click)="onHistory(item); $event.stopPropagation()">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                </button>
+
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="table-footer" *ngIf="totalPages > 0">
+      <div class="pagination-info">
+        Hiển thị <strong>{{ currentPage * pageSize + 1 }}</strong> –
+        <strong>{{ Math.min((currentPage + 1) * pageSize, totalElements) }}</strong>
+        trong tổng <strong>{{ totalElements }}</strong> bản ghi
+      </div>
+      <div class="pagination-controls">
+        <select [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange($event)" class="page-size-select">
+          <option [ngValue]="10">10 / trang</option>
+          <option [ngValue]="20">20 / trang</option>
+          <option [ngValue]="50">50 / trang</option>
+          <option [ngValue]="100">100 / trang</option>
+        </select>
+        <div class="pagination">
+          <button class="btn-page" [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">‹</button>
+          <ng-container *ngFor="let p of pageNumbers">
+            <button *ngIf="p !== -1" class="btn-page" [class.active]="p === currentPage" (click)="onPageChange(p)">{{ p + 1 }}</button>
+            <span *ngIf="p === -1" class="page-ellipsis">…</span>
+          </ng-container>
+          <button class="btn-page" [disabled]="currentPage === totalPages - 1" (click)="onPageChange(currentPage + 1)">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Detail Modal ─────────────────────────────────────────── -->
+<app-group-category-detail-modal
+  *ngIf="showModal && modalId"
+  [groupCategoryId]="modalId"
+  (closed)="onModalClosed($event)"
+></app-group-category-detail-modal>
+
+<!-- ─── Bulk Approve Confirm ─────────────────────────────────── -->
+<ng-container *ngIf="showBulkApproveConfirm">
+  <div class="modal-backdrop" (click)="closeBulkApproveConfirm()"></div>
+  <div class="confirm-dialog">
+    <div class="confirm-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+    <h3 class="confirm-title">Phê duyệt</h3>
+    <p class="confirm-msg">Bạn có chắc chắn phê duyệt <strong>{{ selected.length }}</strong> bản ghi này?</p>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" (click)="closeBulkApproveConfirm()" [disabled]="bulkApproveLoading">Hủy</button>
+      <button class="btn btn-teal" (click)="confirmBulkApprove()" [disabled]="bulkApproveLoading">
+        {{ bulkApproveLoading ? 'Đang xử lý...' : 'Xác nhận' }}
+      </button>
+    </div>
+  </div>
+</ng-container>
+
+<!-- ─── Bulk Reject Dialog ────────────────────────────────────── -->
+<ng-container *ngIf="showBulkRejectDialog">
+  <div class="modal-backdrop" (click)="closeBulkRejectDialog()"></div>
+  <div class="confirm-dialog">
+    <h3 class="confirm-title">Lý do từ chối</h3>
+    <textarea class="reject-textarea" [(ngModel)]="bulkRejectReason" rows="3"
+              placeholder="Nhập lý do từ chối..." maxlength="500"></textarea>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" (click)="closeBulkRejectDialog()" [disabled]="bulkRejectLoading">Hủy</button>
+      <button class="btn btn-danger-solid" (click)="confirmBulkReject()" [disabled]="bulkRejectLoading || !bulkRejectReason.trim()">
+        {{ bulkRejectLoading ? 'Đang xử lý...' : 'Xác nhận' }}
+      </button>
+    </div>
+  </div>
+</ng-container>
+
+<!-- ─── Bulk Cancel Confirm ──────────────────────────────────── -->
+<ng-container *ngIf="showBulkCancelConfirm">
+  <div class="modal-backdrop" (click)="closeBulkCancelConfirm()"></div>
+  <div class="confirm-dialog">
+    <h3 class="confirm-title">Hủy phê duyệt</h3>
+    <p class="confirm-msg">Bạn có chắc chắn hủy phê duyệt <strong>{{ selected.length }}</strong> bản ghi này?</p>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" (click)="closeBulkCancelConfirm()" [disabled]="bulkCancelLoading">Hủy</button>
+      <button class="btn btn-warning-solid" (click)="confirmBulkCancel()" [disabled]="bulkCancelLoading">
+        {{ bulkCancelLoading ? 'Đang xử lý...' : 'Xác nhận' }}
+      </button>
+    </div>
+  </div>
+</ng-container>
